@@ -20,6 +20,7 @@ True					| False
 非空容器 len(x) > 0		| 空容器 len(x) == 0
 0, '', [], (), {}, None	| 其他情况
 
+
 ###2. 善用`in`
 a) 利用`in`来检查容器内的元素。`in`关键词可以用在`list`、`dict`、`set`、`string`等实现了`__contains__`内建函数的类中。
 
@@ -49,7 +50,7 @@ a, b = b, a
 print 'After a: %s, b: %s' %(a, b)	# 20, 10
 </pre>
 
-###4. 利用`try`来处理容器中得元素访问
+###4. 利用`try`来处理容器中的元素访问
 
 在Python中，使用异常检查机制的代价不大（相对Java等其他语言而言），因此不需预先检查容器中对应的key是否存在。
 
@@ -194,6 +195,47 @@ data = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 print reduce(a, data, 0) #45    
 print reduce(a, data, 1) #46
 </pre>
+
+###10. 字符串连接尽量用`join`而不是`+`
+
+由Python内部实现机制决定了字符串String的底层实现是不可变长度的。
+
+a) 当使用`+`操作符进行字符串连接时:
+<pre class="brush: python">
+a = "hello "
+b = "world"
+c = a + b
+</pre>
+python底层会在内存中额外申请一块内存空间tmp(长度为a,b之和)，并将a,b的内容依次拷贝到tmp中，并用c指向tmp完成字符串连接。如果我们有如下的代码:
+
+<pre class="brush: python">
+l_word = []
+l_word.append('hello')
+...
+print l_word #1000
+
+content = ''
+for item in l_word:
+    content = content + item
+</pre>
+这样在每次通过`+`做字符串连接的时候，都有一次申请内存空间，并拷贝两个字符串的操作，这样的效率十分低下。
+
+b) 当使用`join`操作符：
+继续看刚才的例子
+<pre class="brush: python">
+l_word = []
+l_word.append('hello')
+...
+print l_word #1000
+
+content = ''.join(l_word)
+</pre>
+python底层会首先计算`join`操作会涉及到多少元素，总共需要多大的空间，并申请此空间，随后将l_word中每个元素依次拷贝至新申请的空间中。这样，就只会有一次内存申请操作，下面是测试结果，测试的每个字符串平均长度为18，测试了分别连接10, 50, 100, 500, 1000个字符串所用时间(s)
+
+ n     	| 10		| 50		| 100		| 500      | 1000
+-------	| --------	| --------	| --------	| -------- | -------
+`+`		| .000041	| .000076	| .000115	| .000610  | .00170
+`join`	| .000017	| .000069	| .000022	| .000099  | .00016
 
 Good luck :)
 
